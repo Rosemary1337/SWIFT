@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="swift/dashboard/assets/swift.png" alt="SWIFT Logo" width="120">
+  <img src="swift/dashboard/assets/swift.png" alt="SWIFT Logo" width="420">
 </p>
 
 # SWIFT: Smart Web Intelligence Framework & Tracker
