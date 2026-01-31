@@ -1,0 +1,13 @@
+# Demo pages
+swift/dashboard/index2.php
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+swift/logs/
+
+# Optional: Ignore config if secrets are used (enable if needed)
+# swift/config.php

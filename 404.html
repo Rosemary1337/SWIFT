@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 - Resource Not Found | SWIFT</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Google+Sans+Code:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0b;
+        --accent: #ff9d00;
+        --surface: #121214;
+        --border: #1d1d21;
+        --text: #e1e1e6;
+        --text-muted: #a1a1aa;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .container {
+        text-align: center;
+        max-width: 600px;
+        padding: 2rem;
+        position: relative;
+      }
+
+      .error-code {
+        font-family: "Google Sans Code", monospace;
+        font-size: 8rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin: 0;
+        line-height: 1;
+        opacity: 0.1;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .content {
+        position: relative;
+        z-index: 1;
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      p {
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+      }
+
+      .terminal {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: left;
+        font-family: "Google Sans Code", monospace;
+        font-size: 0.85rem;
+        color: var(--accent);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        margin-bottom: 2rem;
+      }
+
+      .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 15px;
+        background: var(--accent);
+        vertical-align: middle;
+        margin-left: 4px;
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        49% {
+          opacity: 1;
+        }
+        50%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .btn {
+        display: inline-block;
+        background: var(--accent);
+        color: #000;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 157, 0, 0.3);
+      }
+
+      .footer-brand {
+        margin-top: 3rem;
+        opacity: 0.5;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="error-code">404</div>
+
+    <div class="container">
+      <div class="content">
+        <h1>Resource Not Found</h1>
+        <p>
+          The requested endpoint does not exist or has been moved within the
+          framework.
+        </p>
+
+        <div class="terminal">
+          <div>> SWIFT_SIEM_CORE --STATUS [FAILED]</div>
+          <div>> REASON: HTTP_ERR_404_NOT_FOUND</div>
+          <div>> SOURCE: <span id="current-url">Loading...</span></div>
+          <div style="margin-top: 1rem">
+            > Redirecting to safe zone...<span class="cursor"></span>
+          </div>
+        </div>
+
+        <a href="/swift2/swift/dashboard/" class="btn">Return to Dashboard</a>
+
+        <div class="footer-brand">
+          Smart Web Intelligence Framework & Tracker
+        </div>
+      </div>
+    </div>
+
+    <script>
+        document.getElementById('current-url').textContent = window.location.pathname;
+    </script>
+</body>
+</html>

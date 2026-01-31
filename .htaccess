@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# 1. Provide internal mapping for clean URLs
+# No external R=301 redirects to avoid loops on InfinityFree
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*?)/?$ $1.php [L]
+
+# 2. Custom Error Pages
+ErrorDocument 404 /swift2/404.html
