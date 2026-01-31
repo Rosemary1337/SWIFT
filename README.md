@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="swift/dashboard/assets/swift.png" alt="SWIFT Logo" width="120">
+  <img src="swift/dashboard/assets/swift.png" alt="SWIFT Logo" width="420">
 </p>
 
 # SWIFT: Smart Web Intelligence Framework & Tracker
@@ -97,6 +97,10 @@ The system includes an integrated Documentation Portal accessible via the dashbo
 ### 5. Automated Intelligence (AI Briefing)
 
 SWIFT integrates with the Groq Cloud API to provide natural language security briefings. It synthesizes complex telemetry data into actionable summaries using Large Language Models (LLMs).
+
+## Demo
+
+For demonstration, please visit https://playground.ros3mary.my.id/swift/dashboard/ with 'swift' key access.
 
 ## Installation
 
