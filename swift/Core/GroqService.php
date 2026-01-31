@@ -28,7 +28,7 @@ class GroqService {
             return "Groq API Key not configured.";
         }
 
-        $logContext = json_encode($logs);
+        $logContext = json_encode($logs, JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR);
         
         $prompt = "As a security analyst, analyze these web logs and provide a concise summary of results, patterns, and risks:\n" . $logContext;
 

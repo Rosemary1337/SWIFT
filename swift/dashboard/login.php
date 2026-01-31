@@ -6,7 +6,7 @@ session_start();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
     if ($_POST['password'] === SWIFT_CONFIG['security']['dashboard_password']) {
         $_SESSION['swift_auth'] = true;
-        header("Location: index.php");
+        header("Location: index");
         exit;
     } else {
         $error = "Access Denied: Invalid Credentials";
@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['password'])) {
 }
 
 if (isset($_SESSION['swift_auth'])) {
-    header("Location: index.php");
+    header("Location: index");
     exit;
 }
 ?>

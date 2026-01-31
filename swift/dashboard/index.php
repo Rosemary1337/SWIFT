@@ -436,20 +436,27 @@ if (!isset($_SESSION['swift_auth'])) {
         
         <div class="grid mb-6">
             <div class="card col-span-3" style="border-left: 3px solid var(--accent);">
-                <div class="card-title">24h Traffic</div>
+                <div class="card-title">Live Traffic (24h)</div>
                 <div class="stat-value" style="color: var(--accent);" id="stat-total">0</div>
+                <div class="text-xs text-secondary mt-1">Total Lifetime: <span id="stat-total-lifetime">0</span></div>
             </div>
             <div class="card col-span-3" style="border-left: 3px solid var(--danger);">
-                <div class="card-title">Threats Detected</div>
+                <div class="card-title">Active Threats (24h)</div>
                 <div class="stat-value" style="color: var(--danger);" id="stat-threats">0</div>
+                <div class="text-xs text-secondary mt-1" style="font-size: 0.65rem;">
+                    M: <span id="stat-m-24h" style="color:var(--danger)">0</span> | 
+                    S: <span id="stat-s-24h" style="color:var(--warning)">0</span>
+                </div>
+                <div class="text-xs text-secondary mt-1">Total Lifetime: <span id="stat-threats-lifetime">0</span></div>
             </div>
             <div class="card col-span-3" style="border-left: 3px solid var(--warning);">
                 <div class="card-title">Avg Risk Score</div>
                 <div class="stat-value" style="color: var(--warning);" id="stat-risk">0</div>
             </div>
             <div class="card col-span-3" style="border-left: 3px solid var(--accent);">
-                <div class="card-title">IP Address</div>
+                <div class="card-title">Unique Attackers (24h)</div>
                 <div class="stat-value" style="color: var(--accent);" id="stat-ips">0</div>
+                <div class="text-xs text-secondary mt-1">Total Lifetime: <span id="stat-ips-lifetime">0</span></div>
             </div>
 
             <div class="card col-span-8">
@@ -472,15 +479,15 @@ if (!isset($_SESSION['swift_auth'])) {
             <div class="card col-span-4">
                 <div class="tabs" style="margin-bottom: 0.5rem; border-bottom: none;">
                     <div class="tab active" onclick="switchSidebar('threats', this)">Threats</div>
-                    <div class="tab" onclick="switchSidebar('attackers', this)">Attackers</div>
+                    <div class="tab" onclick="switchSidebar('attackers', this)">Attackers (Lifetime)</div>
                 </div>
                 
-                <div id="sidebar-threats" class="h-full flex items-center justify-center">
+                <div id="sidebar-threats" class="h-full flex items-center justify-center" style="display: flex;">
                     <div style="height: 250px; width: 60%;">
                         <canvas id="threatChart"></canvas>
                     </div>
                     <div style="width: 40%; padding-left: 1rem; display: flex; flex-direction: column; justify-content: center;">
-                         <div class="text-xs text-secondary uppercase tracking-wider mb-1">Active Threats</div>
+                         <div class="text-xs text-secondary uppercase tracking-wider mb-1">Lifetime Threats</div>
                          <div id="threat-stat-count" class="font-code text-danger font-bold" style="font-size: 2.25rem;">0</div>
                          <div class="text-xs text-secondary mt-1">Total Detected</div>
                     </div>
@@ -737,7 +744,14 @@ if (!isset($_SESSION['swift_auth'])) {
                 currentPage = page;
                 const limit = document.getElementById('row-count').value || 25;
                 const res = await fetch(`api.php?action=stats&filter=${currentFilter}&limit=${limit}&page=${currentPage}`);
-                const data = await res.json();
+                const text = await res.text();
+                let data;
+                try {
+                     data = JSON.parse(text);
+                } catch (e) {
+                     console.error("Dashboard JSON Parse Error. Trace:", text.substring(0, 500));
+                     throw new Error("Malformed API response");
+                }
                 
                 currentLogs = data.recent_logs;
                 allLogs = [...currentLogs];
@@ -746,6 +760,12 @@ if (!isset($_SESSION['swift_auth'])) {
 
                 document.getElementById('stat-total').innerText = data.total_24h;
                 document.getElementById('stat-threats').innerText = data.threats_24h;
+                document.getElementById('stat-m-24h').innerText = data.malicious_24h;
+                document.getElementById('stat-s-24h').innerText = data.suspicious_24h;
+                
+                document.getElementById('stat-total-lifetime').innerText = data.total_lifetime;
+                document.getElementById('stat-threats-lifetime').innerText = data.threats_lifetime;
+                document.getElementById('stat-ips-lifetime').innerText = data.unique_ips_lifetime;
                 document.getElementById('stat-risk').innerText = data.avg_risk;
                 document.getElementById('stat-ips').innerText = data.unique_ips || 0;
 
@@ -803,14 +823,14 @@ if (!isset($_SESSION['swift_auth'])) {
                     }
                 }
 
-                if (data.chart_threats && threatChart && data.chart_threats.length > 0) {
+                if (data.chart_threats_lifetime && threatChart && data.chart_threats_lifetime.length > 0) {
                     let counts = { 'normal': 0, 'suspicious': 0, 'malicious': 0 };
-                    data.chart_threats.forEach(item => { counts[item.classification] = item.count; });
+                    data.chart_threats_lifetime.forEach(item => { counts[item.classification] = item.count; });
                     threatChart.data.datasets[0].data = [counts.normal, counts.suspicious, counts.malicious];
                     threatChart.update();
 
                     let totalThreats = (counts.suspicious || 0) + (counts.malicious || 0);
-                    document.getElementById('threat-stat-count').innerText = totalThreats;
+                    document.getElementById('threat-stat-count').innerText = data.threats_lifetime;
                 }
 
                 if (data.attack_vectors && vectorChart) {
@@ -889,7 +909,7 @@ if (!isset($_SESSION['swift_auth'])) {
             element.classList.add('active');
             
             if (tab === 'threats') {
-                document.getElementById('sidebar-threats').style.display = 'block';
+                document.getElementById('sidebar-threats').style.display = 'flex';
                 document.getElementById('sidebar-attackers').style.display = 'none';
             } else {
                 document.getElementById('sidebar-threats').style.display = 'none';

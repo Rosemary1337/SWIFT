@@ -21,17 +21,60 @@ if (!$pdo) {
 $action = $_GET['action'] ?? '';
 
 if ($action === 'stats') {
-    $stmt = $pdo->query("SELECT COUNT(*) as total FROM swift_logs WHERE timestamp > NOW() - INTERVAL 1 DAY");
-    $total = $stmt->fetch()['total'];
+    $yesterday = date('Y-m-d H:i:s', strtotime('-1 day'));
+    
+    $stmt = $pdo->prepare("
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN classification != 'normal' THEN 1 ELSE 0 END) as threats,
+            AVG(risk_score) as avg_risk,
+            COUNT(DISTINCT CASE WHEN classification != 'normal' THEN ip ELSE NULL END) as unique_ips
+        FROM swift_logs 
+        WHERE timestamp > ?
+    ");
+    $stmt->execute([$yesterday]);
+    $stats = $stmt->fetch();
 
-    $stmt = $pdo->query("SELECT COUNT(*) as threats FROM swift_logs WHERE classification != 'normal' AND timestamp > NOW() - INTERVAL 1 DAY");
-    $threats = $stmt->fetch()['threats'];
+    $total = $stats['total'] ?? 0;
+    $threats = $stats['threats'] ?? 0;
+    $avgRisk = round($stats['avg_risk'] ?? 0, 1);
+    $uniqueIps = $stats['unique_ips'] ?? 0;
 
-    $stmt = $pdo->query("SELECT AVG(risk_score) as avg_risk FROM swift_logs WHERE timestamp > NOW() - INTERVAL 1 DAY");
-    $avgRisk = round($stmt->fetch()['avg_risk'] ?? 0, 1);
+    // 24h Breakdown
+    $stmt = $pdo->prepare("
+        SELECT 
+            SUM(CASE WHEN classification = 'malicious' THEN 1 ELSE 0 END) as malicious_24h,
+            SUM(CASE WHEN classification = 'suspicious' THEN 1 ELSE 0 END) as suspicious_24h
+        FROM swift_logs 
+        WHERE timestamp > ?
+    ");
+    $stmt->execute([$yesterday]);
+    $breakdown24h = $stmt->fetch();
 
-    $stmt = $pdo->query("SELECT COUNT(DISTINCT ip) as unique_ips FROM swift_logs WHERE classification != 'normal' AND timestamp > NOW() - INTERVAL 1 DAY");
-    $uniqueIps = $stmt->fetch()['unique_ips'];
+    $malicious24h = $breakdown24h['malicious_24h'] ?? 0;
+    $suspicious24h = $breakdown24h['suspicious_24h'] ?? 0;
+
+    // Lifetime Stats
+    $lifetimeStats = $pdo->query("
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN classification != 'normal' THEN 1 ELSE 0 END) as threats,
+            SUM(CASE WHEN classification = 'malicious' THEN 1 ELSE 0 END) as malicious,
+            SUM(CASE WHEN classification = 'suspicious' THEN 1 ELSE 0 END) as suspicious
+        FROM swift_logs
+    ")->fetch();
+
+    $totalLifetime = $lifetimeStats['total'] ?? 0;
+    $threatsLifetime = $lifetimeStats['threats'] ?? 0;
+    $maliciousLifetime = $lifetimeStats['malicious'] ?? 0;
+    $suspiciousLifetime = $lifetimeStats['suspicious'] ?? 0;
+
+    // Lifetime Unique Attackers
+    $uniqueLifetime = $pdo->query("
+        SELECT COUNT(DISTINCT ip) 
+        FROM swift_logs 
+        WHERE classification != 'normal'
+    ")->fetchColumn();
 
     $filter = $_GET['filter'] ?? 'all';
     $whereClause = "WHERE 1=1";
@@ -53,62 +96,79 @@ if ($action === 'stats') {
     $offset = ($page - 1) * $limit;
     
     $logQuery = "SELECT * FROM swift_logs $whereClause ORDER BY id DESC LIMIT $limit OFFSET $offset";
-    
-    $stmt = $pdo->query($logQuery);
-    $recentLogs = $stmt->fetchAll();
+    $recentLogs = $pdo->query($logQuery)->fetchAll();
 
     $totalPages = ceil($totalLogs / $limit);
 
+    // Top Attackers (Lifetime View to reflect database volume)
     $stmt = $pdo->query("
         SELECT ip, COUNT(*) as attack_count, SUM(risk_score) as total_risk 
         FROM swift_logs 
-        WHERE classification != 'normal' AND timestamp > NOW() - INTERVAL 1 DAY 
+        WHERE classification != 'normal'
         GROUP BY ip 
         ORDER BY total_risk DESC 
-        LIMIT 5
+        LIMIT 15
     ");
     $topAttackers = $stmt->fetchAll();
 
-    $stmt = $pdo->query("
+    $stmt = $pdo->prepare("
         SELECT DATE_FORMAT(timestamp, '%H:00') as hour, COUNT(*) as count 
         FROM swift_logs 
-        WHERE timestamp > NOW() - INTERVAL 1 DAY 
+        WHERE timestamp > ? 
         GROUP BY hour 
         ORDER BY timestamp ASC
     ");
+    $stmt->execute([$yesterday]);
     $trafficData = $stmt->fetchAll();
 
-    $stmt = $pdo->query("
+    $stmt = $pdo->prepare("
         SELECT classification, COUNT(*) as count 
         FROM swift_logs 
-        WHERE timestamp > NOW() - INTERVAL 1 DAY 
+        WHERE timestamp > ? 
         GROUP BY classification
     ");
+    $stmt->execute([$yesterday]);
     $threatData = $stmt->fetchAll();
 
-    $stmt = $pdo->query("
-        SELECT detection_tags, COUNT(*) as count 
+    // Lifetime Threat Data (Pie Chart)
+    $threatDataLifetime = $pdo->query("
+        SELECT classification, COUNT(*) as count 
         FROM swift_logs 
-        WHERE classification != 'normal' AND timestamp > NOW() - INTERVAL 1 DAY 
-        GROUP BY detection_tags
-        ORDER BY count DESC
-        LIMIT 10
+        GROUP BY classification
+    ")->fetchAll();
+
+    $stmt = $pdo->prepare("
+         SELECT detection_tags, COUNT(*) as count 
+         FROM swift_logs 
+         WHERE classification != 'normal' AND timestamp > ? 
+         GROUP BY detection_tags
+         ORDER BY count DESC
+         LIMIT 10
     ");
+    $stmt->execute([$yesterday]);
     $attackVectors = $stmt->fetchAll();
 
-    $stmt = $pdo->query("
+    $stmt = $pdo->prepare("
         SELECT uri, COUNT(*) as count, SUM(risk_score) as risk 
         FROM swift_logs 
-        WHERE classification != 'normal' AND timestamp > NOW() - INTERVAL 1 DAY 
+        WHERE classification != 'normal' AND timestamp > ? 
         GROUP BY uri 
         ORDER BY count DESC 
         LIMIT 5
     ");
+    $stmt->execute([$yesterday]);
     $topEndpoints = $stmt->fetchAll();
 
     echo json_encode([
         'total_24h' => $total,
         'threats_24h' => $threats,
+        'malicious_24h' => $malicious24h,
+        'suspicious_24h' => $suspicious24h,
+        'total_lifetime' => $totalLifetime,
+        'threats_lifetime' => $threatsLifetime,
+        'malicious_lifetime' => $maliciousLifetime,
+        'suspicious_lifetime' => $suspiciousLifetime,
+        'unique_ips_lifetime' => $uniqueLifetime,
         'avg_risk' => $avgRisk,
         'unique_ips' => $uniqueIps,
         'recent_logs' => $recentLogs,
@@ -117,13 +177,14 @@ if ($action === 'stats') {
         'top_endpoints' => $topEndpoints,
         'chart_traffic' => $trafficData,
         'chart_threats' => $threatData,
+        'chart_threats_lifetime' => $threatDataLifetime,
         'pagination' => [
             'current_page' => $page,
             'total_pages' => $totalPages,
             'total_logs' => $totalLogs,
             'limit' => $limit
         ]
-    ]);
+    ], JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR);
     exit;
 }
 
