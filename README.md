@@ -1,6 +1,43 @@
+<p align="center">
+  <img src="swift/dashboard/assets/swift.png" alt="SWIFT Logo" width="120">
+</p>
+
 # SWIFT: Smart Web Intelligence Framework & Tracker
 
 SWIFT is a passive, high-performance security intelligence platform designed for forensic-level telemetry collection and behavioral threat analysis in PHP-based web environments. It operates synchronously during HTTP requests, providing real-time visibility into the security posture of an application without the need for background services or external dependencies.
+
+## Project Structure
+
+```text
+.
+├── agent.php           # Entry point for telemetry capture
+├── 404.html            # Redesigned framework error page
+├── swift/
+│   ├── boot.php        # Core framework bootstrap & maintenance
+│   ├── config.php      # Global security & API configuration
+│   ├── schema.sql      # Database initialization schema
+│   ├── Core/           # Intelligence Core (PHP Helpers)
+│   │   ├── Analyzer.php      # Heuristic detection logic
+│   │   ├── Database.php      # Singleton PDO wrapper
+│   │   ├── GroqService.php   # AI analysis integration
+│   │   ├── Logger.php        # Transaction logging system
+│   │   └── Telemetry.php     # Data collection helpers
+│   └── dashboard/      # Security Operations Center (UI)
+│       ├── api.php           # Dashboard data endpoint
+│       ├── docs.php          # Integrated documentation portal
+│       ├── index.php         # Main analytics monitor
+│       ├── info.php          # Framework metadata
+│       ├── login.php         # Authentication gateway
+│       ├── settings.php      # System configuration UI
+│       └── assets/           # UI static resources
+└── vulnlab/            # Vulnerability Simulation Lab
+    ├── header.php
+    ├── index.php             # Vulnerability overview
+    ├── lfi_lab.php           # Local File Inclusion lab
+    ├── rce_lab.php           # Remote Code Execution lab
+    ├── sql_lab.php           # SQL Injection lab
+    └── xss_lab.php           # Cross-Site Scripting lab
+```
 
 ## System Architecture
 
