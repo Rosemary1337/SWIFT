@@ -98,6 +98,10 @@ The system includes an integrated Documentation Portal accessible via the dashbo
 
 SWIFT integrates with the Groq Cloud API to provide natural language security briefings. It synthesizes complex telemetry data into actionable summaries using Large Language Models (LLMs).
 
+## Demo
+
+For demonstration, please visit https://playground.ros3mary.my.id/swift/dashboard/ with 'swift' key access.
+
 ## Installation
 
 1. Copy the `swift` directory and `agent.php` to your web server.
