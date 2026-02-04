@@ -100,7 +100,7 @@ SWIFT integrates with the Groq Cloud API to provide natural language security br
 
 ## Demo
 
-For demonstration, please visit https://playground.ros3mary.my.id/swift/dashboard/ with 'swift' key access.
+For dashboard demonstration, please visit https://playground.ros3mary.my.id/swift/dashboard/ with 'swift' key access, and for vulnlab visit https://playground.ros3mary.my.id/vulnlab.
 
 ## Installation
 
