@@ -23,11 +23,13 @@ define('SWIFT_CONFIG', $config);
 try {
     $pdo = \Swift\Core\Database::getInstance();
     if ($pdo) {
-        $stmt = $pdo->query("SELECT skey, svalue FROM swift_settings WHERE skey IN ('last_cleanup', 'log_retention_days')");
+        $stmt = $pdo->query("SELECT skey, svalue FROM swift_settings WHERE skey IN ('last_cleanup', 'log_retention_days', 'timezone')");
         $settings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
         
         $last_cleanup = $settings['last_cleanup'] ?? 0;
         $retention_days = $settings['log_retention_days'] ?? 3;
+        $timezone = $settings['timezone'] ?? 'UTC';
+        date_default_timezone_set($timezone);
         
         if (time() - $last_cleanup > 3600) {
             $pdo->prepare("DELETE FROM swift_logs WHERE timestamp < NOW() - INTERVAL ? DAY")->execute([$retention_days]);

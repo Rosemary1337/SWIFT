@@ -42,6 +42,7 @@ while ($row = $stmt->fetch()) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $groq_api_key = $_POST['groq_api_key'] ?? '';
     $log_retention_days = $_POST['log_retention_days'] ?? '3';
+    $timezone = $_POST['timezone'] ?? 'UTC';
     
     try {
         $stmt = $pdo->prepare("INSERT INTO swift_settings (skey, svalue) VALUES ('groq_api_key', ?) ON DUPLICATE KEY UPDATE svalue = ?");
@@ -50,9 +51,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("INSERT INTO swift_settings (skey, svalue) VALUES ('log_retention_days', ?) ON DUPLICATE KEY UPDATE svalue = ?");
         $stmt->execute([$log_retention_days, $log_retention_days]);
 
+        $stmt = $pdo->prepare("INSERT INTO swift_settings (skey, svalue) VALUES ('timezone', ?) ON DUPLICATE KEY UPDATE svalue = ?");
+        $stmt->execute([$timezone, $timezone]);
+
         $message = "Settings updated successfully.";
         $settings['groq_api_key'] = $groq_api_key;
         $settings['log_retention_days'] = $log_retention_days;
+        $settings['timezone'] = $timezone;
     } catch (Exception $e) {
         $error = "Error updating settings: " . $e->getMessage();
     }
@@ -301,8 +306,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 1rem;
             font-weight: 500;
         }
-        .alert-success { background: rgba(34, 197, 94, 0.1); border: 1px solid var(--success); color: var(--success); }
-        .alert-error { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger); }
+        .alert-success { background: var(--success); border: none; color: var(--bg); }
+        .alert-error { background: var(--danger); border: none; color: var(--bg); }
 
         /* Footer matching index.php */
         footer {
@@ -403,6 +408,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="fas fa-bars"></i>
                 </button>
                 <div id="myDropdown" class="dropdown-content">
+                    <a href="firewall.php"><i class="fas fa-shield-halved"></i> Firewall Logs</a>
                     <a href="settings"><i class="fas fa-gear"></i> Settings</a>
                     <a href="docs"><i class="fas fa-book"></i> Documentation</a>
                     <a href="info"><i class="fas fa-circle-info"></i> Project Info</a>
@@ -449,6 +455,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                placeholder="gsk_************************************************">
                         <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
                             Acquire credentials from <a href="https://console.groq.com/keys" target="_blank" style="color: var(--accent); text-decoration: none;">Groq Console</a>.
+                        </p>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border); margin-bottom: 3rem;"></div>
+
+                <!-- Localization Section -->
+                <div class="form-section">
+                    <div class="section-info">
+                        <h3>Localization</h3>
+                        <p>Configure regional settings such as timezone to ensure accurate log timestamps.</p>
+                    </div>
+                    <div class="input-group">
+                        <label for="timezone">System Timezone</label>
+                        <select name="timezone" id="timezone" 
+                                style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; color: var(--text-primary); font-family: var(--font-main); font-size: 0.9rem; width: 100%; appearance: none; cursor: pointer;">
+                            <?php 
+                            $current_timezone = $settings['timezone'] ?? 'UTC';
+                            $timezones = DateTimeZone::listIdentifiers();
+                            foreach ($timezones as $tz): ?>
+                                <option value="<?php echo $tz; ?>" <?php echo ($current_timezone == $tz) ? 'selected' : ''; ?>>
+                                    <?php echo $tz; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                            All system dates and log timestamps will be displayed in this timezone.
                         </p>
                     </div>
                 </div>

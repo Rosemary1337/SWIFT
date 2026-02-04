@@ -1,9 +1,19 @@
+<?php
+// Retrieve details passed from the agent
+if (!isset($_GET['reason'])) {
+    header("Location: ?reason=" . urlencode("Auto-Blocked: Malicious Activity Detected"));
+    exit;
+}
+$reason = $_GET['reason'];
+$requestId = $_GET['id'] ?? 'N/A';
+$ip = $_SERVER['REMOTE_ADDR'];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 Not Found | SWIFT</title>
+    <title>403 Forbidden | SWIFT Firewall</title>
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code:wght@400;500;600;700&family=Google+Sans:wght@400;500;700&display=swap');
@@ -14,7 +24,7 @@
             --border: #262626;
             --text-primary: #e5e5e5;
             --text-secondary: #a3a3a3;
-            --accent: #f97316;
+            --accent: #f97316; /* Industrial Orange */
             --danger: #ef4444;
         }
 
@@ -38,10 +48,9 @@
             max-width: 450px;
             border-radius: 4px;
             border: 1px solid var(--border);
-            border-top: 4px solid var(--accent);
+            border-top: 4px solid var(--danger);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             box-sizing: border-box;
-            text-align: center;
         }
 
         .brand {
@@ -75,27 +84,27 @@
             line-height: 1.5;
         }
 
-        .btn-primary {
-            display: block;
-            width: 100%; 
-            padding: 0.875rem; 
-            background: var(--border); 
-            color: var(--text-primary); 
-            border: none; 
-            border-radius: 4px; 
-            font-weight: 700; 
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            cursor: pointer; 
-            transition: all 0.2s;
-            text-decoration: none;
-            box-sizing: border-box;
+        .details {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1rem;
+            text-align: left;
+            /* No margin bottom needed as there is no button below */
         }
 
-        .btn-primary:hover { 
-            background: #333; 
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            gap: 2rem;
         }
+        
+        .detail-row:last-child { margin-bottom: 0; }
+
+        .label { color: var(--text-secondary); font-family: 'Google Sans Code', monospace; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+        .value { color: var(--danger); font-family: 'Google Sans Code', monospace; font-weight: 600; text-align: right; }
 
         footer {
             margin-top: 2rem;
@@ -109,18 +118,31 @@
 <body>
 
     <div class="brand">
-        <img src="/swift2/swift/dashboard/assets/swift.png" alt="SWIFT Logo" style="max-width: 100%; height: auto; max-height: 65px;">
+        <img src="assets/swift.png" alt="SWIFT Logo">
     </div>
 
     <div class="container">
-        <h1 class="title">404 Not Found</h1>
-        <div class="subtitle">The page you are looking for does not exist.</div>
+        <h1 class="title">Request Blocked</h1>
+        <div class="subtitle">Your request was flagged by the firewall due to a detected security threat.</div>
 
-        <a href="/swift2/swift/dashboard/index.php" class="btn-primary">Return to Dashboard</a>
+        <div class="details">
+            <div class="detail-row">
+                <span class="label">REASON</span>
+                <span class="value"><?= htmlspecialchars($reason) ?></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">IP ADDRESS</span>
+                <span class="value"><?= $ip ?></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">REQUEST ID</span>
+                <span class="value"><?= htmlspecialchars($requestId) ?></span>
+            </div>
+        </div>
     </div>
 
     <footer>
-        &copy; 2026 Security Web Intelligence Framework & Tracker
+        &copy; <?= date('Y') ?> Security Web Intelligence Framework & Tracker
     </footer>
 
 </body>

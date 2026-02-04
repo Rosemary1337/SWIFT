@@ -9,6 +9,9 @@ if (!isset($_SESSION['swift_auth'])) {
 }
 
 header('Content-Type: application/json');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
 
 $pdo = \Swift\Core\Database::getInstance();
 
@@ -22,6 +25,8 @@ $action = $_GET['action'] ?? '';
 
 if ($action === 'stats') {
     $yesterday = date('Y-m-d H:i:s', strtotime('-1 day'));
+    
+    // We will handle timezone conversion in PHP to be robust against MySQL configuration issues
     
     $stmt = $pdo->prepare("
         SELECT 
@@ -97,6 +102,38 @@ if ($action === 'stats') {
     
     $logQuery = "SELECT * FROM swift_logs $whereClause ORDER BY id DESC LIMIT $limit OFFSET $offset";
     $recentLogs = $pdo->query($logQuery)->fetchAll();
+    
+
+    // We need to know the SYSTEM timezone to interpret the DB string correctly.
+    // robust method: get format +07:00 directly from MySQL if possible, or easily parsable string
+    $sysOffsetStr = $pdo->query("SELECT TIME_FORMAT(TIMEDIFF(NOW(), UTC_TIMESTAMP), '%H:%i')")->fetchColumn();
+    // Prepend + if not negative
+    if ($sysOffsetStr && $sysOffsetStr[0] !== '-' && $sysOffsetStr[0] !== '+') {
+        $sysOffsetStr = '+' . $sysOffsetStr;
+    }
+
+    $targetTz = new DateTimeZone(date_default_timezone_get());
+    $sysTz = null;
+    try {
+        if ($sysOffsetStr) $sysTz = new DateTimeZone($sysOffsetStr);
+    } catch (Exception $e) { /* ignore */ }
+
+    // Convert timestamps in PHP
+    
+    foreach ($recentLogs as &$log) {
+        if (!$log['timestamp']) continue; // Skip if empty
+        
+        try {
+            // If we successfully determined system TZ, use it. Otherwise assume server time = DB time (no conversion)
+            if ($sysTz) {
+                $logTime = new DateTime($log['timestamp'], $sysTz); 
+                $logTime->setTimezone($targetTz);
+                $log['timestamp'] = $logTime->format('Y-m-d H:i:s');
+            }
+        } catch (Exception $e) {
+            // Keep original timestamp if conversion fails
+        }
+    }
 
     $totalPages = ceil($totalLogs / $limit);
 
@@ -111,15 +148,48 @@ if ($action === 'stats') {
     ");
     $topAttackers = $stmt->fetchAll();
 
+    // For traffic chart, fetch raw data and group in PHP
     $stmt = $pdo->prepare("
-        SELECT DATE_FORMAT(timestamp, '%H:00') as hour, COUNT(*) as count 
+        SELECT timestamp 
         FROM swift_logs 
         WHERE timestamp > ? 
-        GROUP BY hour 
         ORDER BY timestamp ASC
     ");
     $stmt->execute([$yesterday]);
-    $trafficData = $stmt->fetchAll();
+    $rawTraffic = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    // Group by hour in User Timezone
+    $trafficDataMap = [];
+    $sysOffsetStr = $pdo->query("SELECT TIME_FORMAT(TIMEDIFF(NOW(), UTC_TIMESTAMP), '%H:%i')")->fetchColumn();
+    if ($sysOffsetStr && $sysOffsetStr[0] !== '-' && $sysOffsetStr[0] !== '+') {
+        $sysOffsetStr = '+' . $sysOffsetStr;
+    }
+
+    $sysTz = null;
+    try {
+        if ($sysOffsetStr) $sysTz = new DateTimeZone($sysOffsetStr);
+    } catch (Exception $e) {}
+    
+    $userTz = new DateTimeZone(date_default_timezone_get());
+
+    foreach ($rawTraffic as $ts) {
+        try {
+            if ($sysTz) {
+                $dt = new DateTime($ts, $sysTz);
+                $dt->setTimezone($userTz);
+                $hour = $dt->format('H:00');
+            } else {
+                 $hour = date('H:00', strtotime($ts));
+            }
+            if (!isset($trafficDataMap[$hour])) $trafficDataMap[$hour] = 0;
+            $trafficDataMap[$hour]++;
+        } catch (Exception $e) {}
+    }
+
+    $trafficData = [];
+    foreach ($trafficDataMap as $h => $c) {
+        $trafficData[] = ['hour' => $h, 'count' => $c];
+    }
 
     $stmt = $pdo->prepare("
         SELECT classification, COUNT(*) as count 

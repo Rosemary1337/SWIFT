@@ -154,9 +154,9 @@ if (isset($_SESSION['swift_auth'])) {
         }
 
         .error-msg {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            color: var(--danger);
+            background: var(--danger);
+            border: none;
+            color: var(--bg);
             padding: 0.75rem;
             border-radius: 4px;
             font-size: 0.875rem;

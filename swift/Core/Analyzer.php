@@ -10,11 +10,11 @@ class Analyzer {
         ],
         'XSS' => [
             'pattern' => '/(<script|javascript:|onload=|onerror=|onclick=|onmouseover=|"><script|%3Cscript)/i',
-            'score' => 70
+            'score' => 85
         ],
         'LFI' => [
             'pattern' => '/(\.\.\/|\.\.\\\\|\/etc\/passwd|\/etc\/shadow|\/etc\/group|C:\\\\Windows\\\\)/i',
-            'score' => 75
+            'score' => 85
         ],
         'COMMAND_INJECTION' => [
             'pattern' => '/([;&|`$]\s*\b(cat|ls|whoami|id|nc|netcat|python|php|perl|ruby|sh|bash|curl|wget|hostname|uname|openssl)\b|\$\(|\$\{)/i',
@@ -54,7 +54,7 @@ class Analyzer {
                         $riskScore += 45;
                         $tags[] = $name . '_IN_HEADERS';
                     } else {
-                        if ($riskScore < 20) {
+                        if ($riskScore < 20 && $name !== 'SQL_INJECTION') {
                             $tags[] = 'HISTORICAL_TRACE_' . $name;
                         }
                     }

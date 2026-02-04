@@ -415,6 +415,7 @@ if (!isset($_SESSION['swift_auth'])) {
             <span class="badge" style="margin-left: 10px; background: var(--accent); color: white; border: none; font-size: 0.6rem;">v1.1</span></div>
         <div class="flex items-center gap-4">
             <div class="text-xs text-secondary" id="load-status">Connecting...</div>
+            <div class="text-xs text-secondary" style="margin-left: -5px;"></div>
             <button onclick="toggleTheme()" id="theme-toggle" title="Toggle Theme" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1rem; transition: color 0.2s; padding: 0.5rem;">
                 <i class="fas fa-moon" id="theme-icon"></i>
             </button>
@@ -423,6 +424,7 @@ if (!isset($_SESSION['swift_auth'])) {
                     <i class="fas fa-bars"></i>
                 </button>
                 <div id="myDropdown" class="dropdown-content">
+                    <a href="firewall.php"><i class="fas fa-shield-halved"></i> Firewall Logs</a>
                     <a href="settings"><i class="fas fa-gear"></i> Settings</a>
                     <a href="docs"><i class="fas fa-book"></i> Documentation</a>
                     <a href="info"><i class="fas fa-circle-info"></i> Project Info</a>
@@ -739,11 +741,12 @@ if (!isset($_SESSION['swift_auth'])) {
 
         updateCharts();
 
+        let lastUpdateTime = Date.now();
         async function fetchData(page = 1) {
             try {
                 currentPage = page;
                 const limit = document.getElementById('row-count').value || 25;
-                const res = await fetch(`api.php?action=stats&filter=${currentFilter}&limit=${limit}&page=${currentPage}`);
+                const res = await fetch(`api.php?action=stats&filter=${currentFilter}&limit=${limit}&page=${currentPage}&t=${Date.now()}`);
                 const text = await res.text();
                 let data;
                 try {
@@ -839,11 +842,15 @@ if (!isset($_SESSION['swift_auth'])) {
                     vectorChart.update();
                 }
                 
-                document.getElementById('load-status').innerText = 'Last updated: ' + new Date().toLocaleTimeString();
+                
+                lastUpdateTime = Date.now();
+                updateTimeDisplay();
 
             } catch (e) {
                 console.error("Fetch error", e);
-                document.getElementById('load-status').innerHTML = '<span style="color:var(--danger)">Connection Offline (Check Console)</span>';
+                
+
+                document.getElementById('load-status').innerHTML = '<span style="color:var(--danger)">Connection Offline</span>';
             }
         }
         
@@ -1035,6 +1042,15 @@ if (!isset($_SESSION['swift_auth'])) {
                 }
             }
         }
+
+        function updateTimeDisplay() {
+            const seconds = Math.floor((Date.now() - lastUpdateTime) / 1000);
+            const status = document.getElementById('load-status');
+            if(status) {
+                status.innerText = `Last updated: ${seconds} seconds ago`;
+            }
+        }
+        setInterval(updateTimeDisplay, 1000);
 
         setInterval(() => fetchData(currentPage), 5000); 
         fetchData();

@@ -332,6 +332,7 @@ if (!isset($_SESSION['swift_auth'])) {
                     <i class="fas fa-bars"></i>
                 </button>
                 <div id="myDropdown" class="dropdown-content">
+                    <a href="firewall.php"><i class="fas fa-shield-halved"></i> Firewall Logs</a>
                     <a href="settings"><i class="fas fa-gear"></i> Settings</a>
                     <a href="docs"><i class="fas fa-book"></i> Documentation</a>
                     <a href="info"><i class="fas fa-circle-info"></i> Project Info</a>
@@ -345,7 +346,7 @@ if (!isset($_SESSION['swift_auth'])) {
 
         <div class="card">
             <div class="card-header">
-                <div class="card-title">Technical Specification v1.1</div>
+                <div class="card-title">Project Documentation</div>
             </div>
             
             <h1 class="page-title" style="margin-bottom: 2rem;">System Manual</h1>
