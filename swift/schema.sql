@@ -29,3 +29,11 @@ CREATE TABLE IF NOT EXISTS swift_settings (
     skey VARCHAR(50) PRIMARY KEY,
     svalue TEXT
 );
+
+CREATE TABLE IF NOT EXISTS swift_firewall (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ip_address VARCHAR(45) NOT NULL UNIQUE,
+    reason VARCHAR(255),
+    blocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    request_data JSON
+);
