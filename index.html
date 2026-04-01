@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code:wght@400;500;600;700&family=Google+Sans:wght@400;500;700&display=swap');
+
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --border: #262626;
+            --text-primary: #e5e5e5;
+            --text-secondary: #a3a3a3;
+            --accent: #f97316; /* Industrial Orange */
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #22c55e;
+            --card-shadow: none;
+            --radius: 4px;
+            --font-main: 'Google Sans', 'Inter', -apple-system, sans-serif;
+            --font-code: 'Google Sans Code', monospace;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand img {
+            height: 65px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-family: var(--font-code);
+            margin: 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .card-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .card-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius);
+            font-size: 0.7rem;
+            font-weight: 600;
+            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-swift {
+            background-color: rgba(249, 115, 22, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+
+        .badge-vuln {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            border-bottom: 1px solid var(--border);
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        a {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        a:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .link-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .link-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .link-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: var(--font-code);
+        }
+
+        .link-icon {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            opacity: 0.5;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        a:hover .link-icon {
+            opacity: 1;
+            transform: translateX(4px);
+            color: var(--accent);
+        }
+
+        footer {
+            margin-top: 4rem;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            opacity: 0.6;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Navigation Hub</h1>
+                <p class="subtitle">Central Access Point</p>
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- SWIFT Module -->
+            <div class="card" style="border-top: 4px solid var(--accent);">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-shield-halved" style="color: var(--accent);"></i> SWIFT Dashboard
+                    </div>
+                </div>
+                <ul>
+                    <li>
+                        <a href="swift/dashboard/">
+                            <div class="link-content">
+                                <span class="link-title">Main Dashboard</span>
+                                <span class="link-desc">Real-time statistics & visual analytics</span>
+                            </div>
+                            <i class="fas fa-chevron-right link-icon"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="swift/dashboard/login">
+                            <div class="link-content">
+                                <span class="link-title">Login</span>
+                                <span class="link-desc">Authentication portal</span>
+                            </div>
+                            <i class="fas fa-chevron-right link-icon"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="swift/dashboard/firewall">
+                            <div class="link-content">
+                                <span class="link-title">Firewall Logs</span>
+                                <span class="link-desc">Security events & blocking history</span>
+                            </div>
+                            <i class="fas fa-chevron-right link-icon"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="swift/dashboard/info">
+                            <div class="link-content">
+                                <span class="link-title">Project Info</span>
+                                <span class="link-desc">About SWIFT Framework</span>
+                            </div>
+                            <i class="fas fa-chevron-right link-icon"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="swift/dashboard/settings">
+                            <div class="link-content">
+                                <span class="link-title">Settings</span>
+                                <span class="link-desc">System configuration</span>
+                            </div>
+                            <i class="fas fa-chevron-right link-icon"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="swift/dashboard/docs">
+                            <div class="link-content">
+                                <span class="link-title">Documentation</span>
+                                <span class="link-desc">API & Integration Guides</span>
+                            </div>
+                            <i class="fas fa-chevron-right link-icon"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- VulnLab Module -->
+            <div class="card" style="border-top: 4px solid var(--danger);">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-bug" style="color: var(--danger);"></i> VulnLab
+                    </div>
+                </div>
+                <ul>
+                    <li>
+                        <a href="vulnlab/index">
+                            <div class="link-content">
+                                <span class="link-title">VulnLab Index</span>
+                                <span class="link-desc">Laboratory Overview</span>
+                            </div>
+                            <i class="fas fa-chevron-right link-icon"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="vulnlab/xss_lab">
+                            <div class="link-content">
+                                <span class="link-title">XSS Lab</span>
+                                <span class="link-desc">Cross-Site Scripting Scenarios</span>
+                            </div>
+                            <i class="fas fa-chevron-right link-icon"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="vulnlab/sql_lab">
+                            <div class="link-content">
+                                <span class="link-title">SQL Injection Lab</span>
+                                <span class="link-desc">Database Injection Scenarios</span>
+                            </div>
+                            <i class="fas fa-chevron-right link-icon"></i>
+                        </a>
+                    </li>
+                     <li>
+                        <a href="vulnlab/rce_lab">
+                            <div class="link-content">
+                                <span class="link-title">RCE Lab</span>
+                                <span class="link-desc">Remote Code Execution Scenarios</span>
+                            </div>
+                            <i class="fas fa-chevron-right link-icon"></i>
+                        </a>
+                    </li>
+                     <li>
+                        <a href="vulnlab/lfi_lab">
+                            <div class="link-content">
+                                <span class="link-title">LFI Lab</span>
+                                <span class="link-desc">Local File Inclusion Scenarios</span>
+                            </div>
+                            <i class="fas fa-chevron-right link-icon"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <div class="brand-footer"><img src="swift/dashboard/assets/swift.png" alt="SWIFT" style="height:40px;"></div>
+            <div>&copy;
+                2026 Smart Web Intelligence Framework & Tracker. All rights reserved.
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

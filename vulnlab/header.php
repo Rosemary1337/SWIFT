@@ -22,6 +22,7 @@ if (!isset($_SESSION['swift_auth'])) {
             --text-muted: #6b7280;
             --accent: #1f2937;
             --danger: #ef4444;
+            --success: #22c55e;
         }
         body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
@@ -140,7 +141,8 @@ if (!isset($_SESSION['swift_auth'])) {
             <a href="sql_lab" class="<?= basename($_SERVER['PHP_SELF']) == 'sql_lab' ? 'active' : '' ?>">SQLi</a>
             <a href="xss_lab" class="<?= basename($_SERVER['PHP_SELF']) == 'xss_lab' ? 'active' : '' ?>">XSS</a>
             <a href="lfi_lab" class="<?= basename($_SERVER['PHP_SELF']) == 'lfi_lab' ? 'active' : '' ?>">LFI</a>
-            <a href="rce_lab" class="<?= basename($_SERVER['PHP_SELF']) == 'rce_lab' ? 'active' : '' ?>">RCE</a>
+            <a href="rce_lab" class="<?= basename($_SERVER['PHP_SELF']) == 'rce_lab.php' ? 'active' : '' ?>">RCE</a>
+            <a href="upload_lab.php" class="<?= basename($_SERVER['PHP_SELF']) == 'upload_lab.php' ? 'active' : '' ?>">File Upload</a>
         </div>
     </div>
     <div class="container">

@@ -17,15 +17,18 @@ if (file_exists(__DIR__ . '/swift/boot.php')) {
         $analyzer = new \Swift\Core\Analyzer();
         $analysis = $analyzer->analyze($telemetry);
         
-        \Swift\Core\Logger::log($telemetry, $analysis);
-
+        $logId = \Swift\Core\Logger::log($telemetry, $analysis);
+        
         // 2. Block Malicious Requests (WAF Mode)
         // Only block the specific request containing the payload. Do not ban the IP.
         if ($analysis['classification'] === 'malicious') {
-            $reason = "WAF Block: Malicious Payload Detected (" . $analysis['detection_tags'] . ")";
-            
-            // Redirect to 403 immediately
-            header("Location: /swift2/swift/dashboard/403.php?reason=" . urlencode($reason));
+            if (session_status() === PHP_SESSION_NONE) session_start();
+            $token = bin2hex(random_bytes(16));
+            $_SESSION['swift_blocked_id'] = $logId;
+            $_SESSION['swift_blocked_token'] = $token;
+
+            // Redirect to 403 immediately with token
+            header("Location: /swift2/swift/dashboard/403.php?token=" . $token);
             exit;
         }
         

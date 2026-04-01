@@ -24,5 +24,7 @@ class Logger {
             $analysis['classification'],
             $analysis['detection_tags']
         ]);
+
+        return $pdo->lastInsertId();
     }
 }

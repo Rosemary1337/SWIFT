@@ -1,12 +1,33 @@
 <?php
-// Retrieve details passed from the agent
-if (!isset($_GET['reason'])) {
-    header("Location: ?reason=" . urlencode("Auto-Blocked: Malicious Activity Detected"));
-    exit;
-}
-$reason = $_GET['reason'];
-$requestId = $_GET['id'] ?? 'N/A';
+require_once __DIR__ . '/../boot.php';
+
+session_start();
+
+// Retrieve details passed from the agent securely via session
+$token = $_GET['token'] ?? null;
+$logId = (isset($_SESSION['swift_blocked_token']) && $_SESSION['swift_blocked_token'] === $token) ? $_SESSION['swift_blocked_id'] : null;
 $ip = $_SERVER['REMOTE_ADDR'];
+$reason = 'Access Denied: Suspicious Activity Detected';
+
+if ($logId) {
+    try {
+        $pdo = \Swift\Core\Database::getInstance();
+        // Still check IP for defense in depth
+        $stmt = $pdo->prepare("SELECT classification, detection_tags FROM swift_logs WHERE id = ? AND ip = ?");
+        $stmt->execute([$logId, $ip]);
+        $log = $stmt->fetch();
+
+        if ($log) {
+            $reason = "Security Threat: Malicious Payload Detected";
+            if (!empty($log['detection_tags'])) {
+                $reason .= " (" . htmlspecialchars($log['detection_tags']) . ")";
+            }
+        }
+    } catch (Exception $e) {
+        // Fallback to generic message
+    }
+}
+$requestId = $logId ?: 'N/A';
 ?>
 <!DOCTYPE html>
 <html lang="en">

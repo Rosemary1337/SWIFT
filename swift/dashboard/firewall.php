@@ -205,6 +205,7 @@ try {
                 <button onclick="toggleDropdown()" class="hamburger-btn"><i class="fas fa-bars"></i></button>
                 <div id="myDropdown" class="dropdown-content">
                     <a href="firewall.php"><i class="fas fa-shield-halved"></i> Firewall Logs</a>
+                    <a href="malicious_files.php" style="color: var(--danger);"><i class="fas fa-virus"></i> Malicious Files</a>
                     <a href="settings.php"><i class="fas fa-gear"></i> Settings</a>
                     <a href="docs.php"><i class="fas fa-book"></i> Documentation</a>
                     <a href="info.php"><i class="fas fa-circle-info"></i> Project Info</a>

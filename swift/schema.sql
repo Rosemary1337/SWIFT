@@ -37,3 +37,12 @@ CREATE TABLE IF NOT EXISTS swift_firewall (
     blocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     request_data JSON
 );
+CREATE TABLE IF NOT EXISTS swift_quarantine (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    log_id INT,
+    original_name VARCHAR(255),
+    quarantine_path VARCHAR(255),
+    detection_details TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (log_id) REFERENCES swift_logs(id)
+);
